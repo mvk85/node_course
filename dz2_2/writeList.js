@@ -68,41 +68,7 @@ async function writeListFiles (listFilesObj, dir) {
 
       await copyFile(src, dest);
     }
-
-    // arFiles.forEach(fileObj => {
-    //   const {name, path: pathFile, newName} = fileObj;
-    //   const src = pathFile + '/' + name;
-    //   let dest;
-    //   if (newName) {
-    //     dest = pathDir + '/' + newName;
-    //   } else {
-    //     dest = pathDir + '/' + name;
-    //   }
-
-    //   fs.copyFileSync(src, dest);
-    // });
   }
-
-  // arFilesObj.forEach((arEntry) => {
-  //   const [key, arFilesObj] = arEntry;
-  //   const pathDir = dir + '/' + key;
-
-  //   await createDir(pathDir);
-  //   const arFiles = normalizeNameFiles(arFilesObj);
-
-  //   arFiles.forEach(fileObj => {
-  //     const {name, path: pathFile, newName} = fileObj;
-  //     const src = pathFile + '/' + name;
-  //     let dest;
-  //     if (newName) {
-  //       dest = pathDir + '/' + newName;
-  //     } else {
-  //       dest = pathDir + '/' + name;
-  //     }
-
-  //     fs.copyFileSync(src, dest);
-  //   });
-  // });
 }
 
 module.exports = writeListFiles;
