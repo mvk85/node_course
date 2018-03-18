@@ -11,20 +11,15 @@ function sendMail(params) {
       subject: config.mail.subject,
       text: message.trim().slice(0, 500) + `\n Отправлено с: <${email}>`
     };
-    console.log('inn sendMail params = ', params);
-
 
     transporter.sendMail(mailOptions, (error) => {
-      console.log('innnnnnnnnnnnnnn');
       if (error) {
-        console.log('innnn error = ', error);
         reject(error);
       }
 
       resolve();
     });
-
-  })
+  });
 }
 
 module.exports = sendMail;

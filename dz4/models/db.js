@@ -20,8 +20,16 @@ db.defaults(
 
 const getProducts = () => db.get('upload').value();
 const getSkills = () => db.get('skills').value();
+const setSkills = (newSkills) => db.set('skills', newSkills).write();
+/**
+ * Set file params
+ * @param {src, name, price} paramsFile - src - direcory path, name - name file, price - price from form
+ */
+const setFileParams = (paramsFile) => db.get('upload').push(paramsFile).write();
 
 module.exports = {
   getProducts,
-  getSkills
+  getSkills,
+  setSkills,
+  setFileParams
 };

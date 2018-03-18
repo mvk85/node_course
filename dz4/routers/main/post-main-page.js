@@ -3,7 +3,6 @@ const {
   getProducts,
   getSkills
 } = require('../../models/db');
-const util = require('util');
 
 async function postMainPage(ctx) {    
   const products = getProducts();
@@ -19,7 +18,7 @@ async function postMainPage(ctx) {
   }
 
   try {
-    const resultMail = await sendMail({name, email, message});
+    await sendMail({name, email, message});
 
     ctx.body = ctx.app.pug.render('pages/index', { products, skills, msgemail: 'форма успешно отправлена'});    
   } catch (error) {
@@ -28,8 +27,6 @@ async function postMainPage(ctx) {
       skills,
       msgemail: `При отправке письма произошла ошибка!: ${error}`
     });
-  } finally {
-    return ctx.body;
   }
 }
 

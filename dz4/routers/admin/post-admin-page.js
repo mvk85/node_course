@@ -1,104 +1,89 @@
+const fs = require('fs');
+const path = require('path');
 const {
-  getSkills
+  getSkills,
+  setSkills,
+  setFileParams
 } = require('../../models/db');
 
 function postAdminPage(ctx) {
-  // console.log(ctx.request);
-  console.log(ctx.request.body.fields);
-  console.log(ctx.request.body.files);
   const skills = getSkills();
+  const body = ctx.request.body;
+  const fields = body.fields;
+  const files = body.files;  
+  const form = fields ? fields.form : body.form;
+  const isFormSkills = form === 'skills';
+  const isFormUpload = form === 'upload';
+  let fileName;  
 
-  ctx.body = ctx.app.pug.render('pages/admin', { skills });
+  if (isFormSkills) {
+    const {
+      age,
+      concerts,
+      cities,
+      years
+    } = body;
+
+    if (!age || !concerts || !cities || !years) {
+      return ctx.redirect('/admin');
+    }
+
+    const newSkills = {
+      age,
+      concerts,
+      cities,
+      years
+    };
+
+    setSkills(newSkills);
+    ctx.body = ctx.app.pug.render('pages/admin', { skills: newSkills });  
+
+    /** Форма для загрузки фоток */
+  } else if (isFormUpload) {
+    const {
+      name,
+      price
+    } = fields;
+    const upload = path.join('./public', 'uploads');
   
-// router.post('/', function(req, res, next) {
-//   const skills = db.get('skills').value();
-
-//   let form = new formidable.IncomingForm();
-//   let upload = path.join('./public', 'upload');
-//   let fileName;
-
-//   if (!fs.existsSync(upload)) {
-//     fs.mkdirSync(upload);
-//   }
-
-//   form.uploadDir = path.join(process.cwd(), upload);
-
-//   form.parse(req, function (err, fields, files) {
-//     if (err) {
-//       return next(err);
-//     }
-//     const {form: formFied} = fields;
-
-//     /** простая форма для записи скилов */
-//     if (formFied === 'skills') {
-//       const {
-//         age,
-//         concerts,
-//         cities,
-//         years
-//       } = fields;
-
-//       if (!age || !concerts || !cities || !years) {
-//         return res.redirect('/admin');
-//       }
+    if (!files.photo || files.photo.name === '' || files.photo.size === 0) {
+      return ctx.body = ctx.app.pug.render('pages/admin', {
+        skills,
+        msgfile: 'Не загружена картинка!'
+      });
+    }
   
-//       const newSkills = {
-//         age,
-//         concerts,
-//         cities,
-//         years
-//       };
-  
-//       db.set('skills', newSkills).write();
-//       res.render('pages/admin', { skills: newSkills });  
+    if (!name || !price) {
+      fs.unlink(files.photo.path);
+      return ctx.body = ctx.app.pug.render('pages/admin', {
+        skills,
+        msgfile: 'Не заполнены поля!'
+      });
+    }
 
-//       /** Форма для загрузки фоток */
-//     } else if (formFied === 'upload') {
-//       const {
-//         name,
-//         price
-//       } = fields;
-    
-//       if (!files.photo || files.photo.name === '' || files.photo.size === 0) {
-//         return res.render('pages/admin', {
-//           skills,
-//           msgfile: 'Не загружена картинка!'
-//         });
-//       }
-    
-//       if (!name || !price) {
-//         fs.unlink(files.photo.path);
-//         return res.render('pages/admin', {
-//           skills,
-//           msgfile: 'Не заполнены поля!'
-//         });
-//       }
+    fileName = path.join(upload, files.photo.name);
   
-//       fileName = path.join(upload, files.photo.name);
-    
-//       fs.rename(files.photo.path, fileName, function (err) {
-//         if (err) {
-//           console.error(err);
-//           fs.unlink(fileName);
-//           fs.rename(files.photo.path, fileName);
-//         }
-//         let dir = fileName.substr(fileName.indexOf('\\'));  
-//         db.get('upload')
-//           .push({
-//             src: dir,
-//             name,
-//             price
-//           })
-//           .write();  
- 
-//         return res.render('pages/admin', {
-//           skills,
-//           msgfile: 'Картинка успешно загружена!'
-//         });
-//       });  
-//     }
-//   });
-// });
+    try {
+      const dir = fileName.substr(fileName.indexOf('\\'));  
+
+      fs.renameSync(files.photo.path, fileName);
+      setFileParams({
+        src: dir,
+        name,
+        price
+      });
+  
+      return ctx.body = ctx.app.pug.render('pages/admin', { skills, msgfile: 'Картинка успешно загружена!' });
+    } catch (error) {
+      console.error('error rename = ', error);      
+      fs.unlinkSync(files.photo.path);
+
+      return ctx.body = ctx.app.pug.render('pages/admin', {
+        skills,
+        msgfile: `Системная ошибка записи: ${error}`
+      });
+    }
+  }
 }
 
 module.exports = postAdminPage;
