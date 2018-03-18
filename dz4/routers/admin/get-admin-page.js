@@ -1,7 +1,9 @@
-const db = require('../../models/db');
+const {
+  getSkills
+} = require('../../models/db');
 
 function getAdminPage(ctx) {
-  const skills = db.get('skills').value();
+  const skills = getSkills();
 
   ctx.body = ctx.app.pug.render('pages/admin', { skills });
 }
