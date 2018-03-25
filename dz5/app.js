@@ -1,15 +1,20 @@
-var express = require('express');
-var path = require('path');
-var logger = require('morgan');
+const express = require('express');
+const path = require('path');
+const bodyParser = require('body-parser');
+const logger = require('morgan');
 
-var index = require('./routes/index');
-var users = require('./routes/users');
+const index = require('./routes/index');
+const api = require('./routes/api');
 
-var app = express();
+const app = express();
 
-app.use(logger('dev'));
+app.use(bodyParser.json({type: 'text/plain'}));
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// app.use(logger('dev'));
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use('/api', api);
 app.use('/', index);
 
 // catch 404 and forward to error handler
